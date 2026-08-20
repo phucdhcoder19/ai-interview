@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: ai-interview
+  datasource:
+    url: jdbc:postgresql://localhost:5433/appdb
+    username: hp
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY:}
+        chat:
+          options:
+            model: gemini-2.5-flash
+        embedding:
+          api-key: ${GEMINI_API_KEY:}
+          text:
+            model: text-embedding-004
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        dimensions: 768
+  profiles:
+    active: local
+server:
+  port: 8080
