@@ -40,6 +40,7 @@ dependencies {
 	// ==== THÊM: Spring AI 2.0 ====
 	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai'
 	implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+	implementation 'org.springframework.ai:spring-ai-rag'
 	implementation 'org.springframework.ai:spring-ai-google-genai-embedding'
 	// (tùy chọn) đọc tài liệu để nạp RAG
 	implementation 'org.springframework.ai:spring-ai-pdf-document-reader'
