@@ -107,7 +107,8 @@ public class InterviewQuestionService {
 		}
 	}
 
-	private String describeDifficulty(String difficulty) {
+	/** Mô tả mức độ, dùng chung cho cả lúc ra đề lẫn lúc chấm điểm. */
+	public static String describeDifficulty(String difficulty) {
 		return DIFFICULTY_DESCRIPTIONS.getOrDefault(difficulty, DIFFICULTY_DESCRIPTIONS.get("mid"));
 	}
 

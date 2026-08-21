@@ -3,6 +3,7 @@ package com.hp.ai_interview.modules.interview.controller;
 import com.hp.ai_interview.common.result.Result;
 import com.hp.ai_interview.modules.interview.model.dto.CreateSessionRequest;
 import com.hp.ai_interview.modules.interview.model.dto.QuestionResponse;
+import com.hp.ai_interview.modules.interview.model.dto.ReportResponse;
 import com.hp.ai_interview.modules.interview.model.dto.SessionResponse;
 import com.hp.ai_interview.modules.interview.model.dto.SkillResponse;
 import com.hp.ai_interview.modules.interview.model.dto.SubmitAnswerRequest;
@@ -51,6 +52,11 @@ public class InterviewController {
 	public Result<SessionResponse> submitAnswer(@PathVariable String sessionId,
 			@Valid @RequestBody SubmitAnswerRequest request) {
 		return Result.ok(sessionService.submitAnswer(sessionId, request.questionIndex(), request.answer()));
+	}
+
+	@GetMapping("/sessions/{sessionId}/report")
+	public Result<ReportResponse> getReport(@PathVariable String sessionId) {
+		return Result.ok(sessionService.getReport(sessionId));
 	}
 
 	@PostMapping("/sessions/{sessionId}/complete")

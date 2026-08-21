@@ -30,6 +30,17 @@ public class InterviewAnswer {
 	@Column(name = "user_answer", columnDefinition = "text")
 	private String userAnswer;
 
+	private Integer score;
+
+	@Column(columnDefinition = "text")
+	private String feedback;
+
+	@Column(name = "key_points_json", columnDefinition = "text")
+	private String keyPointsJson;
+
+	@Column(name = "reference_answer", columnDefinition = "text")
+	private String referenceAnswer;
+
 	@Column(name = "answered_at", insertable = false, updatable = false)
 	private OffsetDateTime answeredAt;
 
@@ -57,8 +68,36 @@ public class InterviewAnswer {
 		return question;
 	}
 
+	public String getCategory() {
+		return category;
+	}
+
 	public String getUserAnswer() {
 		return userAnswer;
+	}
+
+	public Integer getScore() {
+		return score;
+	}
+
+	public String getFeedback() {
+		return feedback;
+	}
+
+	public String getKeyPointsJson() {
+		return keyPointsJson;
+	}
+
+	public String getReferenceAnswer() {
+		return referenceAnswer;
+	}
+
+	/** Ghi kết quả chấm điểm cho câu trả lời này. */
+	public void applyEvaluation(Integer score, String feedback, String keyPointsJson, String referenceAnswer) {
+		this.score = score;
+		this.feedback = feedback;
+		this.keyPointsJson = keyPointsJson;
+		this.referenceAnswer = referenceAnswer;
 	}
 
 	public void updateAnswer(String userAnswer) {

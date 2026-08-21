@@ -37,6 +37,22 @@ public class InterviewSession {
 	@Column(nullable = false)
 	private String status;
 
+	/** PENDING -> PROCESSING -> COMPLETED / FAILED. Thêm sẵn để sau này chuyển sang chấm nền. */
+	@Column(name = "evaluate_status", nullable = false)
+	private String evaluateStatus = "PENDING";
+
+	@Column(name = "overall_score")
+	private Integer overallScore;
+
+	@Column(name = "overall_feedback", columnDefinition = "text")
+	private String overallFeedback;
+
+	@Column(name = "strengths_json", columnDefinition = "text")
+	private String strengthsJson;
+
+	@Column(name = "improvements_json", columnDefinition = "text")
+	private String improvementsJson;
+
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private OffsetDateTime createdAt;
 
@@ -91,6 +107,44 @@ public class InterviewSession {
 
 	public OffsetDateTime getCreatedAt() {
 		return createdAt;
+	}
+
+	public String getEvaluateStatus() {
+		return evaluateStatus;
+	}
+
+	public Integer getOverallScore() {
+		return overallScore;
+	}
+
+	public String getOverallFeedback() {
+		return overallFeedback;
+	}
+
+	public String getStrengthsJson() {
+		return strengthsJson;
+	}
+
+	public String getImprovementsJson() {
+		return improvementsJson;
+	}
+
+	public void markEvaluating() {
+		this.evaluateStatus = "PROCESSING";
+	}
+
+	public void markEvaluationFailed() {
+		this.evaluateStatus = "FAILED";
+	}
+
+	/** Ghi kết quả tổng kết của cả phiên. */
+	public void applyEvaluation(Integer overallScore, String overallFeedback,
+			String strengthsJson, String improvementsJson) {
+		this.overallScore = overallScore;
+		this.overallFeedback = overallFeedback;
+		this.strengthsJson = strengthsJson;
+		this.improvementsJson = improvementsJson;
+		this.evaluateStatus = "COMPLETED";
 	}
 
 	public void advanceTo(int questionIndex) {
