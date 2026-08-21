@@ -45,5 +45,3 @@ application-*-local.yaml
 ### Tài liệu nội bộ, không push ###
 guide/
 
-### Claude Code ###
-.claude/
