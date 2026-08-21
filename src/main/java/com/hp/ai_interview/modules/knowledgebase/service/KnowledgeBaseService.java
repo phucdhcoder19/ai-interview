@@ -4,19 +4,28 @@ import com.hp.ai_interview.modules.knowledgebase.model.AskResponse;
 import com.hp.ai_interview.modules.knowledgebase.model.IngestResponse;
 import com.hp.ai_interview.modules.knowledgebase.model.KnowledgeDocument;
 import com.hp.ai_interview.modules.knowledgebase.repository.KnowledgeDocumentRepository;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.ai.reader.tika.TikaDocumentReader;
 
 @Service
 public class KnowledgeBaseService {
@@ -29,13 +38,6 @@ public class KnowledgeBaseService {
 	 * mà vẫn chặn được câu lạc đề.
 	 */
 	private static final double SIMILARITY_THRESHOLD = 0.6;
-
-	/**
-	 * Chỉ giữ lại nguồn có score đạt ít nhất 85% so với nguồn tốt nhất. Một ngưỡng tuyệt đối
-	 * không tách được nhiễu, vì đoạn nhiễu của câu hỏi này (0.68) còn cao hơn đoạn đúng của
-	 * câu hỏi khác (0.64) — nên phải so tương đối trong cùng một lần truy vấn.
-	 */
-	private static final double SOURCE_RELATIVE_CUTOFF = 0.85;
 
 	private static final PromptTemplate EMPTY_CONTEXT_PROMPT = new PromptTemplate("""
 			Người dùng hỏi một câu nằm ngoài phạm vi kiến thức bạn được cung cấp.
@@ -60,7 +62,12 @@ public class KnowledgeBaseService {
 	}
 
 	public IngestResponse ingest(String title, String text) {
-		KnowledgeDocument saved = documentRepository.save(new KnowledgeDocument(title, "manual"));
+		return save(title, "manual", text);
+	}
+
+	/** Phần dùng chung: lưu metadata, cắt đoạn, vector hóa. */
+	private IngestResponse save(String title, String source, String text) {
+		KnowledgeDocument saved = documentRepository.save(new KnowledgeDocument(title, source));
 
 		Document raw = new Document(text, Map.of(
 				"documentId", saved.getId(),
@@ -69,6 +76,34 @@ public class KnowledgeBaseService {
 		vectorStore.add(chunks);
 
 		return new IngestResponse(saved.getId(), chunks.size());
+	}
+
+	/**
+	 * Nạp một file tài liệu (PDF, DOCX, DOC, TXT...) vào knowledge base.
+	 * Tika tự nhận dạng định dạng nên không cần kiểm tra đuôi file.
+	 */
+	public IngestResponse ingestFile(MultipartFile file, String title) throws IOException {
+		if (file.isEmpty()) {
+			throw new IllegalArgumentException("File rỗng, không có gì để nạp");
+		}
+
+		String documentTitle = StringUtils.hasText(title)
+				? title
+				: StringUtils.getFilename(file.getOriginalFilename());
+
+		String text;
+		try (InputStream in = file.getInputStream()) {
+			List<Document> parsed = new TikaDocumentReader(new InputStreamResource(in)).read();
+			text = parsed.stream()
+					.map(Document::getText)
+					.collect(Collectors.joining(System.lineSeparator()));
+		}
+
+		if (!StringUtils.hasText(text)) {
+			throw new IllegalArgumentException("Không đọc được nội dung văn bản nào từ file này");
+		}
+
+		return save(documentTitle, file.getOriginalFilename(), text);
 	}
 
 	public AskResponse ask(String question) {
@@ -84,41 +119,32 @@ public class KnowledgeBaseService {
 						.build())
 				.build();
 
-		String answer = chatClient.prompt()
+		ChatClientResponse response = chatClient.prompt()
 				.advisors(advisor)
 				.user(question)
 				.call()
-				.content();
+				.chatClientResponse();
 
-		List<Document> matched = vectorStore.similaritySearch(SearchRequest.builder()
-				.query(question)
-				.topK(TOP_K)
-				.similarityThreshold(SIMILARITY_THRESHOLD)
-				.build());
+		String answer = response.chatResponse().getResult().getOutput().getText();
 
-		return new AskResponse(answer, toSources(matched));
+		return new AskResponse(answer, toSources(retrievedDocuments(response)));
 	}
 
 	/**
-	 * Gom các đoạn tìm được thành danh sách nguồn để trả cho client: bỏ đoạn quá yếu so với
-	 * đoạn tốt nhất, và gộp nhiều đoạn của cùng một tài liệu thành một dòng duy nhất.
+	 * Lấy đúng những đoạn mà advisor đã thực sự đưa vào prompt. Trước đây phần này chạy một
+	 * similaritySearch riêng — vừa tốn thêm một lần gọi API embedding cho mỗi câu hỏi,
+	 * vừa trả về cả những đoạn mà câu trả lời không hề dùng tới.
 	 */
-	private List<AskResponse.Source> toSources(List<Document> matched) {
-		if (matched.isEmpty()) {
-			return List.of();
-		}
+	@SuppressWarnings("unchecked")
+	private List<Document> retrievedDocuments(ChatClientResponse response) {
+		Object documents = response.context().get(RetrievalAugmentationAdvisor.DOCUMENT_CONTEXT);
+		return documents instanceof List<?> list ? (List<Document>) list : List.of();
+	}
 
-		double bestScore = matched.stream()
-				.mapToDouble(Document::getScore)
-				.max()
-				.orElse(0);
-		double cutoff = bestScore * SOURCE_RELATIVE_CUTOFF;
-
+	/** Gộp nhiều đoạn của cùng một tài liệu thành một dòng nguồn duy nhất. */
+	private List<AskResponse.Source> toSources(List<Document> used) {
 		Map<String, Double> bestScoreByTitle = new LinkedHashMap<>();
-		for (Document d : matched) {
-			if (d.getScore() < cutoff) {
-				continue;
-			}
+		for (Document d : used) {
 			String title = String.valueOf(d.getMetadata().get("title"));
 			bestScoreByTitle.merge(title, d.getScore(), Math::max);
 		}

@@ -28,5 +28,9 @@ spring:
         dimensions: 768
   profiles:
     active: local
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
 server:
   port: 8080

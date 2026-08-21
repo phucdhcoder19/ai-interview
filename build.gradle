@@ -44,6 +44,8 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-google-genai-embedding'
 	// (tùy chọn) đọc tài liệu để nạp RAG
 	implementation 'org.springframework.ai:spring-ai-pdf-document-reader'
+	implementation 'org.springframework.ai:spring-ai-tika-document-reader'
+
 }
 dependencyManagement {
 	imports {
