@@ -1,4 +1,4 @@
-package com.hp.ai_interview.modules.knowledgebase.model;
+package com.hp.ai_interview.modules.knowledgebase.model.entity;
 
 
 import jakarta.persistence.Column;

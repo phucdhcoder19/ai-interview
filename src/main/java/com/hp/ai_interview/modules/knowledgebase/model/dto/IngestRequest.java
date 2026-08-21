@@ -1,4 +1,4 @@
-package com.hp.ai_interview.modules.knowledgebase.model;
+package com.hp.ai_interview.modules.knowledgebase.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

@@ -1,8 +1,8 @@
 package com.hp.ai_interview.modules.chat.controller;
 
 import com.hp.ai_interview.common.result.Result;
-import com.hp.ai_interview.modules.chat.model.ChatRequest;
-import com.hp.ai_interview.modules.chat.model.ChatResponse;
+import com.hp.ai_interview.modules.chat.model.dto.ChatRequest;
+import com.hp.ai_interview.modules.chat.model.dto.ChatResponse;
 import com.hp.ai_interview.modules.chat.service.ChatService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;

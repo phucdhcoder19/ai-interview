@@ -1,0 +1,18 @@
+displayName: Java Backend
+description: Phỏng vấn Java Backend, xoay quanh Java core, Spring và MySQL; đào sâu vào lựa chọn thiết kế, xử lý sự cố và tối ưu hiệu năng.
+categories:
+  - key: JAVA
+    label: Java core
+    priority: CORE
+    ref: java.md
+  - key: SPRING
+    label: Spring
+    priority: CORE
+    ref: spring.md
+  - key: MYSQL
+    label: MySQL
+    priority: NORMAL
+    ref: mysql.md
+  - key: PROJECT
+    label: Kinh nghiệm dự án
+    priority: ALWAYS_ONE

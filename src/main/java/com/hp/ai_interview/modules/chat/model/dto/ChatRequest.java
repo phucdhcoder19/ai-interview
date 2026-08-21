@@ -1,4 +1,4 @@
-package com.hp.ai_interview.modules.chat.model;
+package com.hp.ai_interview.modules.chat.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

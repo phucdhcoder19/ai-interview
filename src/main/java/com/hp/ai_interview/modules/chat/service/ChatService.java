@@ -8,7 +8,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.hp.ai_interview.modules.chat.model.ChatResponse;
+import com.hp.ai_interview.modules.chat.model.dto.ChatResponse;
 
 
 @Service

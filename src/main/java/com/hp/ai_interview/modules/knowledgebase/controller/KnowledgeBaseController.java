@@ -1,10 +1,10 @@
 package com.hp.ai_interview.modules.knowledgebase.controller;
 
 import com.hp.ai_interview.common.result.Result;
-import com.hp.ai_interview.modules.knowledgebase.model.AskRequest;
-import com.hp.ai_interview.modules.knowledgebase.model.AskResponse;
-import com.hp.ai_interview.modules.knowledgebase.model.IngestRequest;
-import com.hp.ai_interview.modules.knowledgebase.model.IngestResponse;
+import com.hp.ai_interview.modules.knowledgebase.model.dto.AskRequest;
+import com.hp.ai_interview.modules.knowledgebase.model.dto.AskResponse;
+import com.hp.ai_interview.modules.knowledgebase.model.dto.IngestRequest;
+import com.hp.ai_interview.modules.knowledgebase.model.dto.IngestResponse;
 import com.hp.ai_interview.modules.knowledgebase.service.KnowledgeBaseService;
 import jakarta.validation.Valid;
 

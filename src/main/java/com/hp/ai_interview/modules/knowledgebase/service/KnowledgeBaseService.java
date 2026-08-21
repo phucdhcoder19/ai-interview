@@ -1,8 +1,8 @@
 package com.hp.ai_interview.modules.knowledgebase.service;
 
-import com.hp.ai_interview.modules.knowledgebase.model.AskResponse;
-import com.hp.ai_interview.modules.knowledgebase.model.IngestResponse;
-import com.hp.ai_interview.modules.knowledgebase.model.KnowledgeDocument;
+import com.hp.ai_interview.modules.knowledgebase.model.dto.AskResponse;
+import com.hp.ai_interview.modules.knowledgebase.model.dto.IngestResponse;
+import com.hp.ai_interview.modules.knowledgebase.model.entity.KnowledgeDocument;
 import com.hp.ai_interview.modules.knowledgebase.repository.KnowledgeDocumentRepository;
 
 import java.io.IOException;
